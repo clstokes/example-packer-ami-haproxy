@@ -1,0 +1,43 @@
+{
+  "variables": {
+    "region":     "us-east-1",
+    "source_ami": "{{ env `ATLAS_BASE_ARTIFACT_AMAZON_IMAGE_ID` }}",
+    "atlas_name": "{{ env `ATLAS_BUILD_NAME` }}"
+  },
+  "builders": [
+    {
+      "type":          "amazon-ebs",
+      "region":        "{{user `region`}}",
+      "source_ami":    "{{user `source_ami`}}",
+      "instance_type": "t2.small",
+      "ssh_username":  "ubuntu",
+      "ami_name":      "{{user `atlas_name`}}-{{isotime \"2006-01-02T15-04-05\"}}",
+      "tags": {
+        "source_ami":  "{{user `source_ami`}}"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type":            "shell",
+      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "apt-get -qq -y install tomcat7 tomcat7-admin"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type":  "artifice",
+        "files": ["artifice.txt"]
+      },
+      {
+        "type":   "shell-local",
+        "inline": [
+          "curl -X POST -d \"atlas_name={{user `atlas_name`}}\" http://requestb.in/1aztit81"
+        ]
+      }
+    ]
+  ]
+}
