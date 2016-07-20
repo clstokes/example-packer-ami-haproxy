@@ -19,10 +19,6 @@
   ],
   "provisioners": [
     {
-      "type": "shell-local",
-      "command": "env | sort"
-    },
-    {
       "type":            "shell",
       "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
       "inline": [
